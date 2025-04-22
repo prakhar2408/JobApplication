@@ -1,0 +1,53 @@
+package com.learning.companyms.Company.impl;
+
+import com.learning.companyms.Company.Company;
+import com.learning.companyms.Company.CompanyRepository;
+import com.learning.companyms.Company.CompanyService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CompanyServiceImpl implements CompanyService {
+
+    private final CompanyRepository companyRepository;
+
+    public CompanyServiceImpl(CompanyRepository CompanyRepository) {
+        this.companyRepository = CompanyRepository;
+    }
+
+    @Override
+    public List<Company> findAll() {
+        return companyRepository.findAll();
+    }
+
+    @Override
+    public void createCompany(Company Company) {
+        companyRepository.save(Company);
+    }
+
+    @Override
+    public Company getCompanyById(Long id) {
+        return companyRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Company updateCompany(Long id, Company Company) {
+        return companyRepository.findById(id).map(existingCompany -> {
+            existingCompany.setName(Company.getName());
+            existingCompany.setDescription(Company.getDescription());
+            return companyRepository.save(existingCompany);
+        }).orElse(null);
+    }
+
+    @Override
+    public boolean deleteCompanyById(Long id) {
+        try{
+            companyRepository.deleteById(id);
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
+    }
+}
