@@ -1,5 +1,6 @@
 package com.learning.jobms.job;
 
+import com.learning.jobms.job.FeatureFlag.FeatureFlagManager;
 import com.learning.jobms.job.dto.JobDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,9 +12,11 @@ import java.util.List;
 @RequestMapping("/jobs")
 public class JobController {
     private JobService jobService;
+    private final FeatureFlagManager featureFlagManager;
 
-    public JobController(JobService jobService) {
+    public JobController(JobService jobService, FeatureFlagManager featureFlagManager) {
         this.jobService = jobService;
+        this.featureFlagManager = featureFlagManager;
     }
 
     @GetMapping
@@ -23,6 +26,9 @@ public class JobController {
 
     @PostMapping
     public ResponseEntity<String> createJob(@RequestBody Job job){
+        if(!featureFlagManager.isEnabled("job_creation_enabled")){
+            return new ResponseEntity<>("Job creation is currently disabled", HttpStatus.FORBIDDEN);
+        }
         jobService.createJob(job);
         return new ResponseEntity<>("Job added successfully", HttpStatus.CREATED);
     }
